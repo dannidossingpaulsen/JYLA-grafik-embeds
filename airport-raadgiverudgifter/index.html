@@ -1,1 +1,52 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aarhus Kommune – rådgiverudgifter til Aarhus Airport</title>
+<style>
+  :root{--bg:#fff;--text:#121212;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#f3f4f6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:920px;margin:0 auto;padding:24px 18px 20px}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  h1{margin:0;font-size:clamp(26px,5vw,44px);line-height:1.03;letter-spacing:-.035em}
+  .intro{margin:10px 0 24px;font-size:16px;line-height:1.45;color:#374151;max-width:760px}
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;margin:20px 0 28px}
+  .card{border:1px solid var(--line);border-radius:16px;padding:18px;background:#fff}
+  .big{font-size:clamp(34px,7vw,58px);font-weight:800;letter-spacing:-.045em;line-height:1;margin-top:6px}
+  .label{color:var(--muted);font-size:14px;font-weight:600}
+  .sub{margin-top:8px;font-size:14px;color:#4b5563;line-height:1.35}
+  .bars{display:flex;flex-direction:column;gap:14px}
+  .row{display:grid;grid-template-columns:minmax(125px,210px) 1fr minmax(112px,auto);gap:12px;align-items:center}
+  .name{font-weight:700;font-size:15px;line-height:1.15}
+  .barbox{height:24px;background:var(--soft);border-radius:999px;overflow:hidden;position:relative}
+  .bar{height:100%;border-radius:999px;background:var(--accent);min-width:2px;transition:width .6s ease}
+  .amount{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;white-space:nowrap}
+  .highlight .name,.highlight .amount{font-weight:800}.highlight .bar{background:#000}
+  .foot{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.45}
+  @media (max-width:680px){.hero{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;gap:6px 10px}.barbox{grid-column:1/-1;grid-row:2;height:18px}.amount{grid-column:2;grid-row:1}.name{grid-column:1;grid-row:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Aarhus Airport</div>
+  <h1>Næsten 9 millioner til eksterne rådgivere</h1>
+  <p class="intro">Aarhus Kommune har i perioden 2017–2026 (d.d) brugt 8.955.029,43 kr. inkl. moms på eksterne rådgivere i relation til Aarhus Airport A/S.</p>
+  <section class="hero">
+    <div class="card"><div class="label">Samlet rådgiverregning</div><div class="big">8,96 mio. kr.</div><div class="sub">Opgjort af Aarhus Kommune for perioden 2017–2026.</div></div>
+    <div class="card"><div class="label">Største modtager</div><div class="big">5,77 mio.</div><div class="sub">Advokatfirmaet Poul Schmith har modtaget cirka 64,4 % af det samlede beløb.</div></div>
+  </section>
+  <div class="bars" id="bars"></div>
+  <div class="foot">Kilde: Aarhus Kommune, “Bilag 1 – Opgørelse over udgifter til eksterne rådgivere i relation til Aarhus Airport A/S i perioden 2017–2026”. Beløb inkl. moms.</div>
+</div>
+<script>
+const data=[["Advokatfirmaet Poul Schmith",5771364.43],["Kromann Reumert",1097875.00],["Deloitte",562500.00],["KPMG",562500.00],["BDO",525000.00],["Atkins",125000.00],["Horten",115290.00],["Bech Bruun",87500.00],["Thessen Advisory",63000.00],["EY",45000.00]];
+const max=Math.max(...data.map(d=>d[1]));
+const fmt=new Intl.NumberFormat("da-DK",{minimumFractionDigits:0,maximumFractionDigits:2});
+const bars=document.getElementById("bars");
+data.forEach(([name,value],i)=>{const row=document.createElement("div");row.className="row"+(i===0?" highlight":"");row.innerHTML=`<div class="name">${name}</div><div class="barbox" title="${fmt.format(value)} kr."><div class="bar" style="width:${(value/max*100).toFixed(2)}%"></div></div><div class="amount">${fmt.format(value)} kr.</div>`;bars.appendChild(row);});
+</script>
+</body>
+</html>
 
