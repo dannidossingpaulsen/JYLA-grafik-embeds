@@ -28,6 +28,24 @@
   @media (max-width:680px){.hero{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;gap:6px 10px}.barbox{grid-column:1/-1;grid-row:2;height:18px}.amount{grid-column:2;grid-row:1}.name{grid-column:1;grid-row:1}}
 </style>
 </head>
+  <script>
+function sendHeight() {
+  const height = document.documentElement.scrollHeight;
+
+  window.parent.postMessage({
+    type: "jyla-embed-height",
+    height: height
+  }, "*");
+}
+
+window.addEventListener("load", sendHeight);
+window.addEventListener("resize", sendHeight);
+
+if ("ResizeObserver" in window) {
+  const observer = new ResizeObserver(sendHeight);
+  observer.observe(document.body);
+}
+</script>
 <body>
 <div class="wrap">
   <div class="eyebrow">Aarhus Airport</div>
