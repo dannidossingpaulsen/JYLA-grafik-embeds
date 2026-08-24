@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #17324d;
+}
+
+.weather-widget {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.weather-widget h2 {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 4vw, 38px);
+  line-height: 1.1;
+}
+
+.intro {
+  margin: 0 0 18px;
+  color: #667789;
+  font-size: 15px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.controls button {
+  appearance: none;
+  border: 1px solid #d7e0e7;
+  background: #fff;
+  color: #17324d;
+  border-radius: 20px;
+  padding: 8px 13px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.controls button:hover {
+  background: #eef3f6;
+}
+
+.controls button.active {
+  background: #17324d;
+  color: #fff;
+  border-color: #17324d;
+}
+
+.chart {
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 135px minmax(80px, 1fr) 95px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.track {
+  height: 30px;
+  background: #edf2f5;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 7px;
+  transition: width .35s ease;
+}
+
+.value {
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+  color: #667789;
+  font-size: 12px;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.note {
+  margin-top: 12px;
+  color: #8795a1;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Mobil */
+@media (max-width: 600px) {
+  .weather-widget {
+    padding: 10px;
+  }
+
+  .chart {
+    padding: 12px;
+  }
+
+  .row {
+    grid-template-columns: 95px minmax(60px, 1fr) 75px;
+    gap: 8px;
+  }
+
+  .name,
+  .value {
+    font-size: 12px;
+  }
+
+  .track {
+    height: 25px;
+  }
+
+  .controls button {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="weather-widget">
+
+  <h2>Vejret i skolernes sommerferie</h2>
+
+  <p class="intro">
+    Sammenligning af seks østjyske kommuner.
+    Klik på en indikator for at se resultatet.
+  </p>
+
+  <div class="controls" id="controls"></div>
+
+  <div class="chart" id="chart"></div>
+
+  <div class="legend">
+    <span>
+      <span class="dot" style="background:#f5b642"></span>
+      Højere er bedre
+    </span>
+
+    <span>
+      <span class="dot" style="background:#5f7f99"></span>
+      Færre dage er bedre
+    </span>
+  </div>
+
+  <div class="note">
+    Tallene er gengivet efter de leverede data.
+  </div>
+
+</div>
+
+<script>
+
+const data = [
+  {
+    kommune: "Favrskov",
+    score: 76.7,
+    sol: 362.4,
+    temp: 23.3,
+    blaest: 3,
+    regn: 12
+  },
+  {
+    kommune: "Skanderborg",
+    score: 74.1,
+    sol: 361.2,
+    temp: 23.1,
+    blaest: 4,
+    regn: 13
+  },
+  {
+    kommune: "Aarhus",
+    score: 70.2,
+    sol: 362.2,
+    temp: 23.3,
+    blaest: 9,
+    regn: 13
+  },
+  {
+    kommune: "Randers",
+    score: 69.3,
+    sol: 362.4,
+    temp: 23.2,
+    blaest: 10,
+    regn: 13
+  },
+  {
+    kommune: "Syddjurs",
+    score: 66.1,
+    sol: 364.8,
+    temp: 23.1,
+    blaest: 13,
+    regn: 13
+  },
+  {
+    kommune: "Norddjurs",
+    score: 65.5,
+    sol: 372,
+    temp: 23.0,
+    blaest: 15,
+    regn: 12
+  }
+];
+
+const metrics = [
+  {
+    key: "score",
+    label: "Samlet score",
+    unit: "point",
+    higherBetter: true
+  },
+  {
+    key: "sol",
+    label: "Solskinstimer",
+    unit: "timer",
+    higherBetter: true
+  },
+  {
+    key: "temp",
+    label: "Temperatur",
+    unit: "°C",
+    higherBetter: true
+  },
+  {
+    key: "blaest",
+    label: "Blæsedage",
+    unit: "dage",
+    higherBetter: false
+  },
+  {
+    key: "regn",
+    label: "Regnvejrsdage",
+    unit: "dage",
+    higherBetter: false
+  }
+];
+
+let currentMetric = "score";
+
+const controls = document.getElementById("controls");
+const chart = document.getElementById("chart");
+
+/* Knapper */
+
+metrics.forEach(metric => {
+
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.textContent = metric.label;
+
+  button.addEventListener("click", () => {
+    currentMetric = metric.key;
+    render();
+  });
+
+  button.dataset.metric = metric.key;
+
+  controls.appendChild(button);
+
+});
+
+/* Grafik */
+
+function render() {
+
+  const metric = metrics.find(
+    item => item.key === currentMetric
+  );
+
+  const values = data.map(
+    item => item[currentMetric]
+  );
+
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+
+  const sorted = [...data].sort((a, b) => {
+
+    if (metric.higherBetter) {
+      return b[currentMetric] - a[currentMetric];
+    }
+
+    return a[currentMetric] - b[currentMetric];
+
+  });
+
+  document
+    .querySelectorAll(".controls button")
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.metric === currentMetric
+      );
+
+    });
+
+  chart.innerHTML = "";
+
+  sorted.forEach((item, index) => {
+
+    const value = item[currentMetric];
+
+    let percentage;
+
+    if (max === min) {
+      percentage = 100;
+    } else {
+      percentage =
+        18 +
+        ((value - min) / (max - min)) * 82;
+    }
+
+    const row = document.createElement("div");
+
+    row.className = "row";
+
+    const name = document.createElement("div");
+
+    name.className = "name";
+    name.textContent =
+      `${index + 1}. ${item.kommune}`;
+
+    const track = document.createElement("div");
+
+    track.className = "track";
+
+    const bar = document.createElement("div");
+
+    bar.className = "bar";
+
+    bar.style.width = percentage + "%";
+
+    bar.style.background =
+      metric.higherBetter
+        ? "#f5b642"
+        : "#5f7f99";
+
+    const valueElement = document.createElement("div");
+
+    valueElement.className = "value";
+
+    valueElement.textContent =
+      `${formatNumber(value)} ${metric.unit}`;
+
+    track.appendChild(bar);
+
+    row.appendChild(name);
+    row.appendChild(track);
+    row.appendChild(valueElement);
+
+    chart.appendChild(row);
+
+  });
+
+}
+
+function formatNumber(value) {
+
+  return Number(value).toLocaleString(
+    "da-DK",
+    {
+      minimumFractionDigits:
+        Number.isInteger(value) ? 0 : 1,
+      maximumFractionDigits: 1
+    }
+  );
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
