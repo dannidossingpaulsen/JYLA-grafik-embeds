@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kolonihaver i Aarhus Kommune</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynp0Kt2joEz4pknuLZQGjMZbMZpM=" crossorigin="">
+  <style>
+    :root{--ink:#102a43;--muted:#627d98;--line:#d9e2ec;--paper:#fff;--wash:#f5f8fb;--blue:#0b4f78;--green:#34845c;--orange:#d97706;--shadow:0 8px 24px rgba(16,42,67,.12)}
+    *{box-sizing:border-box}
+    html,body{margin:0;background:transparent;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+    button,input,select{font:inherit}
+    .graphic{max-width:1180px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    header{padding:18px 22px 14px;border-bottom:1px solid var(--line)}
+    h1{font:700 clamp(24px,2.7vw,36px)/1.08 Georgia,serif;margin:0 0 7px;letter-spacing:-.02em}
+    .dek{max-width:790px;margin:0;color:#334e68;font-size:16px;line-height:1.45}
+    .stats{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:13px}
+    .stat{display:flex;align-items:baseline;gap:6px;padding:0;background:transparent}
+    .stat strong{display:block;font-size:20px;line-height:1;color:var(--blue)}
+    .stat span{font-size:12px;color:var(--muted)}
+    .toolbar{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(2,minmax(140px,.8fr)) auto;gap:10px;padding:14px 16px;background:var(--wash);border-bottom:1px solid var(--line)}
+    .field{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #bcccdc;border-radius:8px;padding:0 10px;min-height:42px}
+    .field input,.field select{width:100%;border:0;outline:0;background:transparent;color:var(--ink);min-width:0}
+    .field svg{width:16px;height:16px;stroke:var(--muted);flex:none}
+    .reset{border:1px solid #9fb3c8;background:#fff;color:var(--blue);border-radius:8px;padding:0 14px;cursor:pointer;font-weight:700}
+    .reset:hover{background:#eaf2f8}
+    .layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.75fr);min-height:590px}
+    #map{height:590px;background:#dce9ef;position:relative!important;overflow:hidden!important;isolation:isolate}
+    /* Beskyt Leaflets kortfelter mod globale img-regler i CMS/preview. */
+    #map .leaflet-pane,#map .leaflet-tile,#map .leaflet-marker-icon,#map .leaflet-marker-shadow,#map .leaflet-tile-container,#map .leaflet-pane>svg,#map .leaflet-pane>canvas{position:absolute!important;left:0;top:0}
+    #map img.leaflet-tile{display:block!important;width:256px!important;height:256px!important;max-width:none!important;max-height:none!important;min-width:256px!important;min-height:256px!important;margin:0!important;padding:0!important;border:0!important;object-fit:fill!important}
+    #map .leaflet-tile-container{width:auto!important;height:auto!important;max-width:none!important;pointer-events:none}
+    #map .leaflet-map-pane,#map .leaflet-tile-pane,#map .leaflet-overlay-pane,#map .leaflet-shadow-pane,#map .leaflet-marker-pane,#map .leaflet-tooltip-pane,#map .leaflet-popup-pane{width:auto!important;height:auto!important;max-width:none!important}
+    #map .leaflet-control-container img{width:auto!important;height:auto!important;max-width:none!important}
+    .side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+    .side-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);gap:8px}
+    .side-head h2{margin:0;font-size:15px}
+    #matchCount{font-size:12px;color:var(--muted);white-space:nowrap}
+    #list{overflow:auto;max-height:538px}
+    .row{display:block;width:100%;padding:13px 16px;text-align:left;border:0;border-bottom:1px solid #edf2f7;background:#fff;cursor:pointer;color:var(--ink)}
+    .row:hover,.row:focus{background:#f0f6fa;outline:0}
+    .row strong{display:block;font-size:14px;line-height:1.25;margin-bottom:5px}
+    .row-meta{display:flex;flex-wrap:wrap;gap:5px 9px;color:var(--muted);font-size:12px}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;background:var(--green)}
+    .dot.no{background:var(--orange)}
+    .empty{padding:24px 16px;color:var(--muted);line-height:1.45}
+    footer{padding:13px 18px;color:var(--muted);font-size:11px;line-height:1.45;border-top:1px solid var(--line)}
+    .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:var(--shadow)}
+    .leaflet-popup-content{margin:13px 15px;min-width:220px}
+    .popup h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+    .popup dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0;font-size:12px;line-height:1.35}
+    .popup dt{color:var(--muted)}.popup dd{margin:0;font-weight:700}
+    .popup .place{margin:9px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .garden-icon{background:transparent;border:0}
+    .garden-icon span{display:grid;place-items:center;width:31px;height:31px;border:3px solid #fff;border-radius:50%;background:var(--green);box-shadow:0 2px 8px rgba(16,42,67,.38);color:#fff;font-size:12px;font-weight:800}
+    .garden-icon.no span{background:var(--orange)}
+    .leaflet-control-attribution{font-size:9px}
+    @media(max-width:780px){
+      .graphic{border-radius:0;border-left:0;border-right:0}
+      header{padding:18px 16px 14px}.dek{font-size:14px}
+      .stats{gap:6px 14px}.stat strong{font-size:18px}.stat span{font-size:10px}
+      .toolbar{grid-template-columns:1fr 1fr;padding:10px}.toolbar .search{grid-column:1/-1}.reset{min-height:40px}
+      .layout{display:block}.side{border-left:0;border-top:1px solid var(--line)}
+      #map{height:470px}#list{max-height:310px}
+    }
+    @media(max-width:450px){.toolbar{grid-template-columns:1fr}.toolbar .search{grid-column:auto}.stats{gap:5px 10px}.stat strong{font-size:17px}#map{height:430px}}
+  </style>
+</head>
+<body>
+<main class="graphic">
+  <header>
+    <h1>Her ligger Aarhus' kolonihaver</h1>
+    <p class="dek">Aarhus Kommune har registreret 38 haveforeninger, når fire mindre områder på DSB's jord holdes ude. Klik på kortet, eller søg og filtrér i oversigten.</p>
+    <div class="stats" aria-label="Nøgletal">
+      <div class="stat"><strong>38</strong><span>haveforeninger</span></div>
+      <div class="stat"><strong>3.749</strong><span>kolonihaver</span></div>
+      <div class="stat"><strong>32</strong><span>forbundsmedlemmer</span></div>
+    </div>
+  </header>
+  <section class="toolbar" aria-label="Filtre">
+    <label class="field search" aria-label="Søg efter haveforening"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="search" type="search" placeholder="Søg efter haveforening eller sted"></label>
+    <label class="field"><select id="member" aria-label="Filtrér efter medlemskab"><option value="all">Alle foreninger</option><option value="yes">Med i Kolonihaveforbundet</option><option value="no">Ikke med i forbundet</option></select></label>
+    <label class="field"><select id="owner" aria-label="Filtrér efter ejer"><option value="all">Alle jordejere</option><option value="Aarhus Kommune">Aarhus Kommune</option><option value="Stat">Staten</option><option value="Privat/forening">Privat eller forening</option></select></label>
+    <button class="reset" id="reset" type="button">Nulstil</button>
+  </section>
+  <section class="layout">
+    <div id="map" role="application" aria-label="Kort over kolonihaver i Aarhus Kommune"></div>
+    <aside class="side">
+      <div class="side-head"><h2>Haveforeninger</h2><span id="matchCount"></span></div>
+      <div id="list"></div>
+    </aside>
+  </section>
+  <footer><strong>Kilde:</strong> Aarhus Kommunes oversigt »Haveforeninger med organisering og kvm«, maj 2018. Fire DSB-ejede områder med i alt 30 haver er udeladt. Punkterne er placeret ved den enkelte haveforening på baggrund af offentlige kort- og adresseoplysninger; de viser ikke områdernes juridiske skel. Kort: OpenStreetMap.</footer>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const gardens = [
+ {n:'Haveforeningen Sølyst',o:'Aarhus Kommune',m:1,g:46,p:'Rugholmvej, 8260 Viby J',c:[56.1386251,10.1457016]},
+ {n:'Haveforeningen 1941',o:'Aarhus Kommune',m:1,g:23,p:'Damtoften, 8260 Viby J',c:[56.1391096,10.1420518]},
+ {n:'Haveforeningen Rugholm',o:'Aarhus Kommune',m:1,g:124,p:'Damtoften, 8260 Viby J',c:[56.1365757,10.144085]},
+ {n:'Haveforeningen Norringholm',o:'Aarhus Kommune',m:1,g:179,p:'Damtoften, 8260 Viby J',c:[56.1358318,10.141409]},
+ {n:'Fællesgrunden Søborglund',o:'Privat/forening',m:0,g:28,p:'Rugholmvej 110, 8260 Viby J',c:[56.1396189,10.1440029]},
+ {n:'Haveforeningen Søvang',o:'Aarhus Kommune',m:0,g:104,p:'Sylbækvej 38, 8230 Åbyhøj',c:[56.1431992,10.1459054]},
+ {n:'Haveforeningen af 1934',o:'Aarhus Kommune',m:1,g:59,p:'Viby Ringvej og Damtoften, 8260 Viby J',c:[56.1368328,10.1529961]},
+ {n:'Haveforeningen Lunden',o:'Aarhus Kommune',m:1,g:8,p:'Sylbækvej, 8230 Åbyhøj',c:[56.1415043,10.1480232]},
+ {n:'Haveforeningen Mosevang',o:'Aarhus Kommune',m:1,g:128,p:'Åhavevej, 8260 Viby J',c:[56.1379014,10.1692429]},
+ {n:'Haveforeningen 1940',o:'Aarhus Kommune',m:1,g:131,p:'Åhavevej, 8260 Viby J',c:[56.1358919,10.1675721]},
+ {n:'Haveforeningen Engvang',o:'Aarhus Kommune',m:1,g:184,p:'Åhavevej og Viby Ringvej, 8260 Viby J',c:[56.1338531,10.159632]},
+ {n:'Haveforeningen Bakkevang',o:'Aarhus Kommune',m:1,g:167,p:'Åbyvej og Chr. Winthers Vej, 8230 Åbyhøj',c:[56.1444176,10.1660086]},
+ {n:'Haveforeningen Vesterled',o:'Aarhus Kommune',m:1,g:142,p:'Åbyvej og Offersensvej, 8230 Åbyhøj',c:[56.1459997,10.1661483]},
+ {n:'Haveforeningen af 10. maj 1918',o:'Privat/forening',m:0,g:59,p:'Ved Ormslevvej og Stensagervej, 8260 Viby J',c:[56.12984,10.1462146]},
+ {n:'Haveforeningen Fritiden',o:'Privat/forening',m:1,g:57,p:'Lokesvej, 8230 Åbyhøj',c:[56.148108,10.1678637]},
+ {n:'Haveforeningen Åbrinken',o:'Privat/forening',m:1,g:139,p:'Vestre Ringgade og Søren Frichs Vej, 8000 Aarhus C',c:[56.1514267,10.1805903]},
+ {n:'Haveforeningen Enghaven',o:'Privat/forening',m:0,g:83,p:'Sten Blichers Vej, 8230 Åbyhøj',c:[56.159022,10.1535162]},
+ {n:'Haveforeningen Solvangen',o:'Aarhus Kommune',m:1,g:130,p:'Oldjordsvej, 8230 Åbyhøj',c:[56.1587448,10.1781439]},
+ {n:'Haveforeningen Oldjorden',o:'Aarhus Kommune',m:1,g:142,p:'Oldjordsvej, 8230 Åbyhøj',c:[56.1581291,10.174516]},
+ {n:'Haveforeningen Frydenlund',o:'Aarhus Kommune',m:1,g:84,p:'Mellem Fenrisvej og Silkeborgvej, 8230 Åbyhøj',c:[56.1613125,10.1747028]},
+ {n:'Haveforeningen Oldhøjen',o:'Aarhus Kommune',m:1,g:72,p:'Mellem Fenrisvej og Silkeborgvej, 8230 Åbyhøj',c:[56.1603998,10.1714749]},
+ {n:'Haveforeningen Charlottehøj',o:'Aarhus Kommune',m:1,g:139,p:'Slotslyngen, 8210 Aarhus V',c:[56.1741101,10.1741244]},
+ {n:'Haveforeningen Trillegården',o:'Aarhus Kommune',m:1,g:111,p:'Haslevangsvej, 8210 Aarhus V',c:[56.1723616,10.1706409]},
+ {n:'Haveforeningen Moselund',o:'Stat',m:1,g:152,p:'Jernaldervej, 8210 Aarhus V',c:[56.1723478,10.1495813]},
+ {n:'Haveforeningen Skovlunden',o:'Aarhus Kommune',m:1,g:133,p:'Skovridervej, 8000 Aarhus C',c:[56.1232551,10.2020676]},
+ {n:'Haveforeningen Risskov anno 1918',o:'Aarhus Kommune',m:1,g:195,p:'Grenåvej, 8240 Risskov',c:[56.1836923,10.2211529]},
+ {n:'Haveforeningen Grænsen',o:'Aarhus Kommune',m:1,g:139,p:'Børglumvej, 8200 Aarhus N',c:[56.1879541,10.205137]},
+ {n:'Haveforeningen Risvangen',o:'Aarhus Kommune',m:1,g:147,p:'Børglumvej, 8200 Aarhus N',c:[56.1886549,10.2032154]},
+ {n:'Haveforeningen Kirkevangen',o:'Aarhus Kommune',m:1,g:58,p:'Skovvangsvej og Finsensgade, 8200 Aarhus N',c:[56.1776459,10.2052537]},
+ {n:'Haveforeningen O.H.A.',o:'Aarhus Kommune',m:1,g:18,p:'Langelandsgade, 8200 Aarhus N',c:[56.1726373,10.1998342]},
+ {n:'Brabrand Haveforening af 1967',o:'Aarhus Kommune',m:0,g:72,p:'Edwin Rahrs Vej 67, 8220 Brabrand',c:[56.1635231,10.1154143]},
+ {n:'Skjoldhøj',o:'Stat',m:1,g:29,p:'Spobjergvej, 8220 Brabrand',c:[56.1693815,10.110868]},
+ {n:'Haveforeningen Marienlyst',o:'Aarhus Kommune',m:1,g:167,p:'Marienlystvej, 8200 Aarhus N',c:[56.1822209,10.1548719]},
+ {n:'Haveforeningen Dybkjær',o:'Aarhus Kommune',m:1,g:47,p:'Bodøvej, 8200 Aarhus N',c:[56.1799968,10.1766486]},
+ {n:'Haveforeningen Nobilis',o:'Aarhus Kommune',m:1,g:26,p:'Nobilisvej, Skæring Hede, 8250 Egå',c:[56.242933,10.325523]},
+ {n:'Haveforeningen Humlehaven af 1970',o:'Aarhus Kommune',m:1,g:79,p:'Hestebjergefaldet, 8200 Aarhus N',c:[56.2082758,10.1696478]},
+ {n:'Haveforeningen Søholm',o:'Aarhus Kommune',m:1,g:112,p:'Søholmvej, 8260 Viby J',c:[56.1415275,10.111515]},
+ {n:'Haveforeningen Bjødstrup Mose',o:'Aarhus Kommune',m:0,g:36,p:'Haveforeningen Bjødstrup Mose, 8270 Højbjerg',c:[56.1046966,10.1642391]}
+];
+
+const map=L.map('map',{scrollWheelZoom:true,zoomControl:true,doubleClickZoom:true,touchZoom:true,boxZoom:true}).setView([56.158,10.18],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-bidragsydere'}).addTo(map);
+const layer=L.layerGroup().addTo(map), markers=new Map();
+const icon=d=>L.divIcon({className:'garden-icon '+(d.m?'':'no'),html:`<span>${d.g}</span>`,iconSize:[31,31],iconAnchor:[16,16],popupAnchor:[0,-14]});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const popup=d=>`<div class="popup"><h3>${esc(d.n)}</h3><dl><dt>Antal haver</dt><dd>${d.g.toLocaleString('da-DK')}</dd><dt>Ejer</dt><dd>${esc(d.o)}</dd><dt>Organisering</dt><dd>${d.m?'Medlem af Kolonihaveforbundet':'Ikke medlem af Kolonihaveforbundet'}</dd></dl><p class="place">Placering: ${esc(d.p)}</p></div>`;
+gardens.forEach((d,i)=>{const mk=L.marker(d.c,{icon:icon(d),title:d.n}).bindPopup(popup(d));mk.on('click',()=>selectRow(i));markers.set(i,mk)});
+
+const search=document.querySelector('#search'),member=document.querySelector('#member'),owner=document.querySelector('#owner'),list=document.querySelector('#list'),matchCount=document.querySelector('#matchCount');
+function filtered(){const q=search.value.trim().toLocaleLowerCase('da');return gardens.map((d,i)=>({...d,i})).filter(d=>(!q||(d.n+' '+d.p).toLocaleLowerCase('da').includes(q))&&(member.value==='all'||(member.value==='yes')===!!d.m)&&(owner.value==='all'||d.o===owner.value));}
+function draw(fit=false){const data=filtered();layer.clearLayers();data.forEach(d=>layer.addLayer(markers.get(d.i)));matchCount.textContent=`${data.length} af ${gardens.length}`;list.innerHTML=data.length?data.map(d=>`<button class="row" type="button" data-i="${d.i}"><strong>${esc(d.n)}</strong><span class="row-meta"><span>${d.g} haver</span><span>${esc(d.o)}</span><span><i class="dot ${d.m?'':'no'}"></i>${d.m?'Medlem':'Ikke medlem'}</span></span></button>`).join(''):'<div class="empty">Ingen haveforeninger matcher de valgte filtre.</div>';list.querySelectorAll('.row').forEach(b=>b.addEventListener('click',()=>focusGarden(Number(b.dataset.i))));if(fit&&data.length){const bounds=L.latLngBounds(data.map(d=>d.c));map.fitBounds(bounds.pad(.12),{maxZoom:14});}}
+function focusGarden(i){const d=gardens[i],mk=markers.get(i);map.flyTo(d.c,15,{duration:.55});setTimeout(()=>mk.openPopup(),300);selectRow(i)}
+function selectRow(i){list.querySelectorAll('.row').forEach(r=>r.style.background=Number(r.dataset.i)===i?'#e6f0f6':'');}
+[search,member,owner].forEach(el=>el.addEventListener(el===search?'input':'change',()=>draw(true)));
+document.querySelector('#reset').addEventListener('click',()=>{search.value='';member.value='all';owner.value='all';draw(true)});
+draw(true);
+window.addEventListener('load',()=>setTimeout(()=>map.invalidateSize(),100));
+if(window.ResizeObserver)new ResizeObserver(()=>map.invalidateSize()).observe(document.querySelector('#map'));
+</script>
+</body>
+</html>
