@@ -26,13 +26,18 @@
     .reset{border:1px solid #9fb3c8;background:#fff;color:var(--blue);border-radius:8px;padding:0 14px;cursor:pointer;font-weight:700}
     .reset:hover{background:#eaf2f8}
     .layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.75fr);min-height:590px}
+    .map-shell{position:relative;min-width:0}
     #map{height:590px;background:#dce9ef;position:relative!important;overflow:hidden!important;isolation:isolate}
+    .map-key{position:absolute;z-index:500;left:12px;bottom:24px;display:flex;align-items:center;gap:8px;max-width:230px;padding:8px 11px;border:1px solid rgba(16,42,67,.18);border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 2px 8px rgba(16,42,67,.16);color:var(--ink);font-size:12px;line-height:1.25;pointer-events:none}
+    .map-key-marker{display:grid;place-items:center;flex:none;width:27px;height:27px;border:3px solid #fff;border-radius:50%;background:var(--green);box-shadow:0 1px 5px rgba(16,42,67,.32);color:#fff;font-size:10px;font-weight:800}
     /* Beskyt Leaflets kortfelter mod globale img-regler i CMS/preview. */
     #map .leaflet-pane,#map .leaflet-tile,#map .leaflet-marker-icon,#map .leaflet-marker-shadow,#map .leaflet-tile-container,#map .leaflet-pane>svg,#map .leaflet-pane>canvas{position:absolute!important;left:0;top:0}
     #map img.leaflet-tile{display:block!important;width:256px!important;height:256px!important;max-width:none!important;max-height:none!important;min-width:256px!important;min-height:256px!important;margin:0!important;padding:0!important;border:0!important;object-fit:fill!important}
     #map .leaflet-tile-container{width:auto!important;height:auto!important;max-width:none!important;pointer-events:none}
     #map .leaflet-map-pane,#map .leaflet-tile-pane,#map .leaflet-overlay-pane,#map .leaflet-shadow-pane,#map .leaflet-marker-pane,#map .leaflet-tooltip-pane,#map .leaflet-popup-pane{width:auto!important;height:auto!important;max-width:none!important}
     #map .leaflet-control-container img{width:auto!important;height:auto!important;max-width:none!important}
+    #map .leaflet-marker-pane{z-index:650!important;pointer-events:auto!important}
+    #map .leaflet-marker-icon,#map .leaflet-marker-icon span{pointer-events:auto!important;cursor:pointer!important}
     .side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
     .side-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);gap:8px}
     .side-head h2{margin:0;font-size:15px}
@@ -52,8 +57,9 @@
     .popup dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0;font-size:12px;line-height:1.35}
     .popup dt{color:var(--muted)}.popup dd{margin:0;font-weight:700}
     .popup .place{margin:9px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
-    .garden-icon{background:transparent;border:0}
-    .garden-icon span{display:grid;place-items:center;width:31px;height:31px;border:3px solid #fff;border-radius:50%;background:var(--green);box-shadow:0 2px 8px rgba(16,42,67,.38);color:#fff;font-size:12px;font-weight:800}
+    .garden-icon{background:transparent;border:0;cursor:pointer}
+    .garden-icon span{display:grid;place-items:center;width:35px;height:35px;border:3px solid #fff;border-radius:50%;background:var(--green);box-shadow:0 2px 8px rgba(16,42,67,.38);color:#fff;font-size:12px;font-weight:800;transition:transform .12s ease,box-shadow .12s ease}
+    .garden-icon:hover span,.garden-icon:focus span{transform:scale(1.12);box-shadow:0 3px 12px rgba(16,42,67,.5)}
     .garden-icon.no span{background:var(--orange)}
     .leaflet-control-attribution{font-size:9px}
     @media(max-width:780px){
@@ -62,7 +68,7 @@
       .stats{gap:6px 14px}.stat strong{font-size:18px}.stat span{font-size:10px}
       .toolbar{grid-template-columns:1fr 1fr;padding:10px}.toolbar .search{grid-column:1/-1}.reset{min-height:40px}
       .layout{display:block}.side{border-left:0;border-top:1px solid var(--line)}
-      #map{height:470px}#list{max-height:310px}
+      #map{height:470px}#list{max-height:310px}.map-key{left:10px;bottom:20px;max-width:205px;padding:7px 9px;font-size:11px}
     }
     @media(max-width:450px){.toolbar{grid-template-columns:1fr}.toolbar .search{grid-column:auto}.stats{gap:5px 10px}.stat strong{font-size:17px}#map{height:430px}}
   </style>
@@ -85,7 +91,10 @@
     <button class="reset" id="reset" type="button">Nulstil</button>
   </section>
   <section class="layout">
-    <div id="map" role="application" aria-label="Kort over kolonihaver i Aarhus Kommune"></div>
+    <div class="map-shell">
+      <div id="map" role="application" aria-label="Klikbart kort over kolonihaver i Aarhus Kommune"></div>
+      <div class="map-key" aria-hidden="true"><span class="map-key-marker">124</span><span><strong>Tallet viser antal haver.</strong><br>Klik på en prik for at se foreningen.</span></div>
+    </div>
     <aside class="side">
       <div class="side-head"><h2>Haveforeninger</h2><span id="matchCount"></span></div>
       <div id="list"></div>
@@ -139,10 +148,10 @@ const gardens = [
 const map=L.map('map',{scrollWheelZoom:true,zoomControl:true,doubleClickZoom:true,touchZoom:true,boxZoom:true}).setView([56.158,10.18],12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-bidragsydere'}).addTo(map);
 const layer=L.layerGroup().addTo(map), markers=new Map();
-const icon=d=>L.divIcon({className:'garden-icon '+(d.m?'':'no'),html:`<span>${d.g}</span>`,iconSize:[31,31],iconAnchor:[16,16],popupAnchor:[0,-14]});
+const icon=d=>L.divIcon({className:'garden-icon '+(d.m?'':'no'),html:`<span>${d.g}</span>`,iconSize:[35,35],iconAnchor:[18,18],popupAnchor:[0,-17]});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const popup=d=>`<div class="popup"><h3>${esc(d.n)}</h3><dl><dt>Antal haver</dt><dd>${d.g.toLocaleString('da-DK')}</dd><dt>Ejer</dt><dd>${esc(d.o)}</dd><dt>Organisering</dt><dd>${d.m?'Medlem af Kolonihaveforbundet':'Ikke medlem af Kolonihaveforbundet'}</dd></dl><p class="place">Placering: ${esc(d.p)}</p></div>`;
-gardens.forEach((d,i)=>{const mk=L.marker(d.c,{icon:icon(d),title:d.n}).bindPopup(popup(d));mk.on('click',()=>selectRow(i));markers.set(i,mk)});
+gardens.forEach((d,i)=>{const mk=L.marker(d.c,{icon:icon(d),interactive:true,bubblingMouseEvents:false,riseOnHover:true,riseOffset:1000,title:`${d.n}: ${d.g} haver`,keyboard:true,alt:`${d.n}, ${d.g} haver`}).bindTooltip(`${esc(d.n)} · ${d.g} haver`,{direction:'top',offset:[0,-16]}).bindPopup(popup(d));mk.on('click',()=>{mk.openPopup();selectRow(i)});markers.set(i,mk)});
 
 const search=document.querySelector('#search'),member=document.querySelector('#member'),owner=document.querySelector('#owner'),list=document.querySelector('#list'),matchCount=document.querySelector('#matchCount');
 function filtered(){const q=search.value.trim().toLocaleLowerCase('da');return gardens.map((d,i)=>({...d,i})).filter(d=>(!q||(d.n+' '+d.p).toLocaleLowerCase('da').includes(q))&&(member.value==='all'||(member.value==='yes')===!!d.m)&&(owner.value==='all'||d.o===owner.value));}
