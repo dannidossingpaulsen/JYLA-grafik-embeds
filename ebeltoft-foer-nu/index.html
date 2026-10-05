@@ -1,1 +1,241 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Før og nu – galleri</title>
+<style>
+*{box-sizing:border-box}html,body{width:100%;margin:0;background:transparent;font-family:Arial,sans-serif;color:#172534}
+.gallery{width:100%;min-width:0;max-width:1100px;margin:auto;padding:16px;background:#fff;border:1px solid #dde3e9;border-radius:12px}
+.heading{margin:0 0 5px;font-size:clamp(20px,3vw,28px);line-height:1.2;overflow-wrap:anywhere}.intro{margin:0 0 14px;color:#586675;font-size:14px}
+.comparison{--position:50%;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#e9eef2;border-radius:7px}
+.comparison img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
+.comparison .before{clip-path:inset(0 calc(100% - var(--position)) 0 0);background:#e9eef2}
+.label{position:absolute;top:12px;padding:8px 11px;border-radius:5px;background:#000b;color:white;font-size:14px;font-weight:bold;pointer-events:none}.old{left:12px}.new{right:12px}
+.credit{position:absolute;bottom:12px;left:12px;max-width:calc(100% - 24px);padding:6px 9px;border-radius:4px;background:#000b;color:#fff;font-size:12px;line-height:1.4;pointer-events:none}
+.divider{position:absolute;top:0;bottom:0;left:var(--position);width:3px;transform:translateX(-50%);background:white;box-shadow:0 0 5px #0008;pointer-events:none}
+.handle{position:absolute;top:50%;left:clamp(26px,var(--position),calc(100% - 26px));pointer-events:none;transform:translate(-50%,-50%);display:grid;place-items:center;width:52px;height:52px;border:3px solid white;border-radius:50%;color:white;background:#023b7e;font-size:25px}
+.control{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
+.comparison:focus-within{outline:3px solid #023b7e;outline-offset:-3px}.hint{margin:0;padding:11px;text-align:center;color:#586675;font-size:13px}
+.error{position:absolute;inset:auto 12px 12px;margin:0;padding:10px;background:white;color:#333;font-size:14px;pointer-events:none}.error[hidden]{display:none}
+.gallery-heading{font-size:16px;margin:12px 0 10px}.choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.choice{display:block;width:100%;padding:0;border:2px solid #dce3e9;border-radius:8px;overflow:hidden;background:white;text-align:left;cursor:pointer;color:inherit;font:inherit;min-height:44px;-webkit-tap-highlight-color:transparent}
+.choice[aria-pressed="true"]{border-color:#023b7e;background:#f0f5fc}.choice:focus-visible{outline:3px solid #023b7e;outline-offset:3px}.choice:hover{border-color:#023b7e}
+.thumbs{display:flex;aspect-ratio:2/1;background:#e9eef2}.thumbs img{width:50%;height:100%;object-fit:cover}.thumbs img+img{border-left:2px solid white}
+.caption{display:block;padding:9px 10px}.place{display:block;font-weight:bold;font-size:14px;overflow-wrap:anywhere}.years{display:block;margin-top:4px;font-size:12px;color:#586675}
+.mobile-hint{display:none}
+@media(max-width:640px){
+ .gallery{padding:10px;border-radius:8px}
+ .heading{font-size:21px;line-height:1.3}
+ .comparison{min-height:210px;max-height:70vh;max-height:70svh}
+ .choices{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:3px;padding:3px 3px 12px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+ .choice{flex:0 0 160px;scroll-snap-align:start;scroll-margin-inline:3px}
+ .caption{padding:10px;line-height:1.4}
+ .label{font-size:13px;padding:7px 9px}
+ .old{left:8px}.new{right:8px}
+ .credit{bottom:8px;left:8px;font-size:11px;padding:5px 7px;max-width:calc(100% - 16px)}
+ .hint{font-size:13px;line-height:1.5;padding:10px 0}
+ .gallery-heading{margin-top:10px;margin-bottom:5px}
+ .mobile-hint{display:block;margin:0 0 8px;font-size:12px;color:#586675}
+}
+@media(prefers-reduced-motion:reduce){.choices{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main class="gallery" aria-label="Før og nu-galleri">
+<h1 class="heading" id="location" aria-live="polite">Grønningen</h1>
+<p class="intro">Se stedet før og nu</p>
+<div class="comparison" id="comparison" role="group" aria-labelledby="location">
+<div id="photos"></div>
+<span class="label old" id="before-year">Før · 1925</span><span class="label new" id="after-year">Nu</span>
+<span class="credit">Før-foto: <strong>Ebeltoft Arkiv</strong></span>
+<div class="divider" aria-hidden="true"></div>
+<span class="handle" aria-hidden="true">↔</span>
+<input class="control" id="control" type="range" min="0" max="100" value="50" aria-label="Træk for at sammenligne før og nu" aria-valuetext="50 procent gammelt foto">
+<p class="error" id="error" role="status" hidden>Et foto kunne ikke indlæses. Prøv igen senere.</p>
+</div>
+<p class="hint">Træk skyderen – eller brug piletasterne</p>
+<h2 class="gallery-heading">Vælg et billedpar</h2>
+<p class="mobile-hint" id="mobile-hint">Swipe til siderne for at se flere steder</p>
+<div class="choices" id="choices" role="group" aria-label="Vælg sted til den store slider" aria-describedby="mobile-hint"></div>
+<noscript>Aktivér JavaScript for at bruge galleriet.</noscript>
+</main>
+<!--
+REDAKTIONEL OPSÆTNING
+Ret oplysningerne nedenfor. Tilføj flere objekter i listen (adskilt med komma)
+med samme felter: location, beforeYear, before, after.
+Årstal kan også skrives som fx "ca. 1950". Brug fulde billedadresser.
+Stednavne, før-årstal og billedlinks er indlæst fra det leverede Excel-ark.
+Nu-billeder vises uden årstal.
+Billederne vises i fuld størrelse uden beskæring i den store slider.
+For den bedste sammenligning bør billeder have samme udsnit og format.
+-->
+<script type="application/json" id="gallery-data">
+[
+  {
+    "location": "Grønningen",
+    "beforeYear": "1925",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706397/2j95ym",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706467/68dd9h"
+  },
+  {
+    "location": "Adelgade 7-9",
+    "beforeYear": "1930",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706398/us52d5",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706464/p7pbhq"
+  },
+  {
+    "location": "Nørreport sanatorium/sundhedshus",
+    "beforeYear": "1915",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706427/hqdtix",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706395/ew5gm7"
+  },
+  {
+    "location": "Adelgade 44-46",
+    "beforeYear": "1970",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706399/jqg3ic",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706430/44fr32"
+  },
+  {
+    "location": "Adelgade 46",
+    "beforeYear": "1912",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706402/cc0d3j",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706441/dwjgal"
+  },
+  {
+    "location": "Adelgade 25",
+    "beforeYear": "1943",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706403/c3rig7",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706442/o3mcy3"
+  },
+  {
+    "location": "Adelgade",
+    "beforeYear": "1950-60",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706401/nbjbhg",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706443/1fz9e7"
+  },
+  {
+    "location": "Jernbanegade 10-12",
+    "beforeYear": "1967",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706394/c55e14",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706431/i1sl48"
+  },
+  {
+    "location": "Adelgade 23",
+    "beforeYear": "1979",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706400/j4njqt",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706444/pc9vey"
+  },
+  {
+    "location": "Kvickly",
+    "beforeYear": "1992",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706408/c97wax",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706445/s195h4"
+  },
+  {
+    "location": "Havnevej 11",
+    "beforeYear": "1990",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706407/9r7f60",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706446/n4xz8o"
+  },
+  {
+    "location": "Rådhuset set Juulsbakke",
+    "beforeYear": "1900",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706426/9yqzvn",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706457/ib0hzx"
+  },
+  {
+    "location": "Ebeltoftcentret/365 discount",
+    "beforeYear": "1990",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706420/a948ik",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706465/aft9et"
+  },
+  {
+    "location": "Juulsbakke 14",
+    "beforeYear": "1937",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706414/9gmazg",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706447/r5cudt"
+  }
+]
+</script>
+<script>
+const pairs=JSON.parse(document.getElementById('gallery-data').textContent);
+// Bland hele billedpar, så billeder, sted og årstal følges ad.
+for(let i=pairs.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [pairs[i],pairs[j]]=[pairs[j],pairs[i]];
+}
+const comparison=document.getElementById('comparison');
+const control=document.getElementById('control');
+const photos=document.getElementById('photos');
+const choices=document.getElementById('choices');
+const error=document.getElementById('error');
+let selected=-1;
+function updatePosition(){
+  comparison.style.setProperty('--position',control.value+'%');
+  control.setAttribute('aria-valuetext',control.value+' procent gammelt foto');
+}
+control.addEventListener('input',updatePosition);
+// Præcis trækbetjening på hele billedet, også ved sliderens yderpunkter.
+let draggingPointer=null;
+function positionFromPointer(event){
+  const rect=comparison.getBoundingClientRect();
+  if(!rect.width)return;
+  control.value=String(Math.round(Math.max(0,Math.min(100,(event.clientX-rect.left)/rect.width*100))));
+  updatePosition();
+}
+control.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary || (event.pointerType==='mouse' && event.button!==0))return;
+  event.preventDefault();
+  control.focus({preventScroll:true});
+  draggingPointer=event.pointerId;
+  control.setPointerCapture(event.pointerId);
+  positionFromPointer(event);
+});
+control.addEventListener('pointermove',event=>{
+  if(event.pointerId===draggingPointer)positionFromPointer(event);
+});
+function stopDragging(event){
+  if(event.pointerId===draggingPointer)draggingPointer=null;
+}
+control.addEventListener('pointerup',stopDragging);
+control.addEventListener('pointercancel',stopDragging);
+control.addEventListener('lostpointercapture',stopDragging);
+function selectPair(index){
+  const pair=pairs[index];
+  selected=index;
+  document.getElementById('location').textContent=pair.location;
+  document.getElementById('before-year').textContent='Før · '+pair.beforeYear;
+  document.getElementById('after-year').textContent='Nu';
+  control.value='50'; updatePosition(); error.hidden=true;
+  photos.replaceChildren();
+  comparison.style.aspectRatio='3 / 2';
+  [['after','Nyt'],['before','Gammelt']].forEach(([key,label])=>{
+    const img=document.createElement('img');
+    img.className=key; img.alt=label+' foto af '+pair.location+(key==='before'?', '+pair.beforeYear:''); img.draggable=false;
+    img.addEventListener('error',()=>{if(img.parentElement===photos)error.hidden=false;});
+    if(key==='after') img.addEventListener('load',()=>{
+      if(img.parentElement===photos && img.naturalWidth && img.naturalHeight)
+        comparison.style.aspectRatio=img.naturalWidth+' / '+img.naturalHeight;
+    });
+    photos.append(img);img.src=pair[key];
+  });
+  Array.from(choices.children).forEach((button,i)=>button.setAttribute('aria-pressed',String(i===selected)));
+}
+pairs.forEach((pair,index)=>{
+  const button=document.createElement('button');button.type='button';button.className='choice';
+  button.setAttribute('aria-pressed','false');
+  button.setAttribute('aria-label',pair.location+': '+pair.beforeYear+' og nu');
+  const thumbs=document.createElement('span');thumbs.className='thumbs';thumbs.setAttribute('aria-hidden','true');
+  ['before','after'].forEach(key=>{const img=document.createElement('img');img.alt='';img.loading='lazy';img.src=pair[key];thumbs.append(img);});
+  const caption=document.createElement('span');caption.className='caption';
+  const place=document.createElement('span');place.className='place';place.textContent=pair.location;
+  const years=document.createElement('span');years.className='years';years.textContent=pair.beforeYear+' → Nu';
+  caption.append(place,years);button.append(thumbs,caption);
+  button.addEventListener('click',()=>selectPair(index));choices.append(button);
+});
+if(pairs.length)selectPair(0);
+</script>
+</body>
+</html>
 
