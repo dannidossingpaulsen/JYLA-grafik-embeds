@@ -12,11 +12,13 @@
 .comparison img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
 .comparison .before{clip-path:inset(0 calc(100% - var(--position)) 0 0);background:#e9eef2}
 .label{position:absolute;top:12px;padding:8px 11px;border-radius:5px;background:#000b;color:white;font-size:14px;font-weight:bold;pointer-events:none}.old{left:12px}.new{right:12px}
-.credit{position:absolute;bottom:12px;left:12px;max-width:calc(100% - 24px);padding:6px 9px;border-radius:4px;background:#000b;color:#fff;font-size:12px;line-height:1.4;pointer-events:none}
+
 .divider{position:absolute;top:0;bottom:0;left:var(--position);width:3px;transform:translateX(-50%);background:white;box-shadow:0 0 5px #0008;pointer-events:none}
 .handle{position:absolute;top:50%;left:clamp(26px,var(--position),calc(100% - 26px));pointer-events:none;transform:translate(-50%,-50%);display:grid;place-items:center;width:52px;height:52px;border:3px solid white;border-radius:50%;color:white;background:#023b7e;font-size:25px}
 .control{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
-.comparison:focus-within{outline:3px solid #023b7e;outline-offset:-3px}.hint{margin:0;padding:11px;text-align:center;color:#586675;font-size:13px}
+.comparison:focus-within{outline:3px solid #023b7e;outline-offset:-3px}.image-footer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:12px;padding:12px 0;color:#586675}
+.photo-credit{margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}.credit-before{text-align:left}.credit-now{text-align:right}
+.hint{margin:0;padding:0;text-align:center;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 .error{position:absolute;inset:auto 12px 12px;margin:0;padding:10px;background:white;color:#333;font-size:14px;pointer-events:none}.error[hidden]{display:none}
 .gallery-heading{font-size:16px;margin:12px 0 10px}.choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .choice{display:block;width:100%;padding:0;border:2px solid #dce3e9;border-radius:8px;overflow:hidden;background:white;text-align:left;cursor:pointer;color:inherit;font:inherit;min-height:44px;-webkit-tap-highlight-color:transparent}
@@ -27,14 +29,14 @@
 @media(max-width:640px){
  .gallery{padding:10px;border-radius:8px}
  .heading{font-size:21px;line-height:1.3}
- .comparison{min-height:210px;max-height:70vh;max-height:70svh}
+ .comparison{min-height:210px}
  .choices{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:3px;padding:3px 3px 12px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
  .choice{flex:0 0 160px;scroll-snap-align:start;scroll-margin-inline:3px}
  .caption{padding:10px;line-height:1.4}
  .label{font-size:13px;padding:7px 9px}
  .old{left:8px}.new{right:8px}
- .credit{bottom:8px;left:8px;font-size:11px;padding:5px 7px;max-width:calc(100% - 16px)}
- .hint{font-size:13px;line-height:1.5;padding:10px 0}
+ 
+ .image-footer{gap:8px;padding:10px 0}.photo-credit{font-size:12px}.hint{font-size:12px}
  .gallery-heading{margin-top:10px;margin-bottom:5px}
  .mobile-hint{display:block;margin:0 0 8px;font-size:12px;color:#586675}
 }
@@ -44,17 +46,20 @@
 <body>
 <main class="gallery" aria-label="Før og nu-galleri">
 <h1 class="heading" id="location" aria-live="polite">Grønningen</h1>
-<p class="intro">Se stedet før og nu</p>
+<p class="intro">Se stedet i Ebeltoft før og nu</p>
 <div class="comparison" id="comparison" role="group" aria-labelledby="location">
 <div id="photos"></div>
 <span class="label old" id="before-year">Før · 1925</span><span class="label new" id="after-year">Nu</span>
-<span class="credit">Før-foto: <strong>Ebeltoft Arkiv</strong></span>
 <div class="divider" aria-hidden="true"></div>
 <span class="handle" aria-hidden="true">↔</span>
 <input class="control" id="control" type="range" min="0" max="100" value="50" aria-label="Træk for at sammenligne før og nu" aria-valuetext="50 procent gammelt foto">
 <p class="error" id="error" role="status" hidden>Et foto kunne ikke indlæses. Prøv igen senere.</p>
 </div>
+<div class="image-footer">
+<p class="photo-credit credit-before">Foto: <strong>Ebeltoft Arkiv</strong></p>
 <p class="hint">Træk skyderen – eller brug piletasterne</p>
+<p class="photo-credit credit-now">Foto: <strong>Anne Frank Henriksen</strong></p>
+</div>
 <h2 class="gallery-heading">Vælg et billedpar</h2>
 <p class="mobile-hint" id="mobile-hint">Swipe til siderne for at se flere steder</p>
 <div class="choices" id="choices" role="group" aria-label="Vælg sted til den store slider" aria-describedby="mobile-hint"></div>
@@ -155,6 +160,30 @@ For den bedste sammenligning bør billeder have samme udsnit og format.
     "beforeYear": "1937",
     "before": "https://billeder.lokalavisen.dk/pictures/image/19706414/9gmazg",
     "after": "https://billeder.lokalavisen.dk/pictures/image/19706447/r5cudt"
+  },
+  {
+    "location": "Udsigt fra Skelhøje",
+    "beforeYear": "Ukendt årstal",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706425/mb2j0p",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706435/e16uqc"
+  },
+  {
+    "location": "Nygade 3",
+    "beforeYear": "1944",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706410/vjluse",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706459/s0k3ig"
+  },
+  {
+    "location": "Jernbanegade 22",
+    "beforeYear": "1995",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706419/ny7ptv",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706463/i2qeys"
+  },
+  {
+    "location": "Overgade 18",
+    "beforeYear": "1970",
+    "before": "https://billeder.lokalavisen.dk/pictures/image/19706424/8f64pr",
+    "after": "https://billeder.lokalavisen.dk/pictures/image/19706437/e0uhwl"
   }
 ]
 </script>
@@ -235,7 +264,30 @@ pairs.forEach((pair,index)=>{
   button.addEventListener('click',()=>selectPair(index));choices.append(button);
 });
 if(pairs.length)selectPair(0);
+// Meld galleriets indholdshøjde til siden, der indeholder iframe'en.
+// Mål indholdet, ikke iframe-vinduet, så højden også kan blive mindre.
+const galleryRoot=document.querySelector('.gallery');
+let resizeFrame=0;
+let lastReportedHeight=0;
+function reportGalleryHeight(){
+  resizeFrame=0;
+  if(window.parent===window)return;
+  const height=Math.ceil(galleryRoot.getBoundingClientRect().height)+2;
+  if(height===lastReportedHeight)return;
+  lastReportedHeight=height;
+  window.parent.postMessage({type:'ebeltoft-gallery-height',height},'*');
+}
+function scheduleGalleryHeight(){
+  if(!resizeFrame)resizeFrame=requestAnimationFrame(reportGalleryHeight);
+}
+if(typeof ResizeObserver!=='undefined'){
+  new ResizeObserver(scheduleGalleryHeight).observe(galleryRoot);
+}
+window.addEventListener('resize',scheduleGalleryHeight);
+window.addEventListener('load',scheduleGalleryHeight);
+document.addEventListener('load',scheduleGalleryHeight,true);
+if(document.fonts)document.fonts.ready.then(scheduleGalleryHeight);
+scheduleGalleryHeight();
 </script>
 </body>
 </html>
-
