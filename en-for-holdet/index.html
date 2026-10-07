@@ -24,5 +24,5 @@
 <footer>Kilder: Kommunale dokumenter, mailkorrespondance mv.. Tidslinjen viser udvalgte begivenheder.</footer>
 </section>
 
-<script>const root=document.getElementById("efh-timeline");function reportHeight(){if(window.parent!==window)window.parent.postMessage({type:"efh-timeline-height",height:Math.ceil(document.documentElement.getBoundingClientRect().height)},"*")}new ResizeObserver(reportHeight).observe(root);window.addEventListener("load",reportHeight);</script>
+<script>const root=document.getElementById("efh-timeline");function reportHeight(){if(window.parent!==window)window.parent.postMessage({type:"efh-timeline-height",height:Math.ceil(root.getBoundingClientRect().height)},"*")}new ResizeObserver(reportHeight).observe(root);window.addEventListener("load",reportHeight);</script>
 </body></html>
