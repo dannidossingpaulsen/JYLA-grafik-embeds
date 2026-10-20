@@ -71,5 +71,32 @@ tabs.forEach(function(tab,index){
 });
 })();
 </script>
+
+<script>
+(function () {
+  'use strict';
+  if (window.parent === window) return;
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  const box = document.querySelector('.box');
+  let pending = false;
+  function reportHeight() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () {
+      pending = false;
+      const height = Math.ceil(box.getBoundingClientRect().height) + 2;
+      window.parent.postMessage({type: 'aarhus-budget-2027-height', height: height}, '*');
+    });
+  }
+  new ResizeObserver(reportHeight).observe(box);
+  window.addEventListener('load', reportHeight);
+  window.addEventListener('resize', reportHeight);
+  window.addEventListener('message', function(event) {
+    if (event.source === window.parent && event.data && event.data.type === 'aarhus-budget-2027-measure') reportHeight();
+  });
+  reportHeight();
+})();
+</script>
 </body>
 </html>
