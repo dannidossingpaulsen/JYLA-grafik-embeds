@@ -226,24 +226,57 @@ render();
 </script>
 
 <script>
-// Mål kun grafikkens indhold, aldrig iframe-vinduets højde.
 (function () {
-  var content = document.querySelector('.wrap');
-  if (!content) return;
-  var lastHeight = -1;
-  function sendHeight() {
-    if (window.parent === window) return;
-    var rect = content.getBoundingClientRect();
-    var height = Math.ceil(rect.bottom - rect.top + parseFloat(getComputedStyle(content).marginTop || 0) + parseFloat(getComputedStyle(content).marginBottom || 0));
-    if (!Number.isFinite(height) || height <= 0 || height === lastHeight) return;
-    lastHeight = height;
-    window.parent.postMessage({type:'spareguide:resize',height:height},'*');
+  var wrap = document.querySelector('.wrap');
+  if (!wrap || window.parent === window) return;
+  var lastHeight = 0;
+  var lastWidth = 0;
+  var scheduled = false;
+
+  function measure() {
+    scheduled = false;
+    // Beregn indholdets bund ud fra elementernes faktiske positioner.
+    // Brug aldrig document.scrollHeight eller iframe-vinduets højde.
+    var children = wrap.children;
+    var bottom = 0;
+    for (var i = 0; i < children.length; i++) {
+      var el = children[i];
+      if (getComputedStyle(el).display === 'none') continue;
+      bottom = Math.max(bottom, el.offsetTop + el.offsetHeight);
+    }
+    var style = getComputedStyle(wrap);
+    var height = Math.ceil(bottom + parseFloat(style.paddingBottom || '0'));
+    if (height > 0 && height !== lastHeight) {
+      lastHeight = height;
+      window.parent.postMessage({type:'spareguide:resize', height:height}, '*');
+    }
   }
-  if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(content);
-  window.addEventListener('load', sendHeight);
-  window.addEventListener('resize', sendHeight);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sendHeight);
-  sendHeight();
+
+  function schedule() {
+    if (!scheduled) {
+      scheduled = true;
+      requestAnimationFrame(measure);
+    }
+  }
+
+  // Ændringer i kort og filtre kan ændre højden.
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      // Ignorer højdeændringer i selve iframe-vinduet.
+      // Kun ændringer i indholdets bredde skal udløse en ny måling her.
+      var width = wrap.clientWidth;
+      if (width !== lastWidth) {
+        lastWidth = width;
+        schedule();
+      }
+    }).observe(wrap);
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(schedule).observe(wrap, {childList:true, subtree:true, characterData:true});
+  }
+  window.addEventListener('load', schedule);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+  schedule();
 })();
 </script>
 </body>
