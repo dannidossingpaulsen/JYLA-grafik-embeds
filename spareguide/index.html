@@ -224,6 +224,29 @@ document.getElementById("search").addEventListener("input",render);
 document.getElementById("year").addEventListener("change",render);
 render();
 </script>
+
+<script>
+// Meddel højden til den side, som indlejrer grafikken.
+(function () {
+  let lastHeight = -1;
+  function sendHeight() {
+    if (window.parent === window) return;
+    const height = Math.ceil(Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight,
+      document.documentElement.getBoundingClientRect().height
+    ));
+    if (height === lastHeight) return;
+    lastHeight = height;
+    window.parent.postMessage({type: 'spareguide:resize', height: height}, '*');
+  }
+  if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  document.fonts?.ready.then(sendHeight);
+  sendHeight();
+})();
+</script>
 </body>
 </html>
 
