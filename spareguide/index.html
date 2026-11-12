@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hvor rammer sparekniven? – Aarhus Kommune</title>
+<style>
+:root{
+  --ink:#000000;
+  --muted:#334155;
+  --paper:#e9eef2;
+  --white:#ffffff;
+  --line:#cfd8e3;
+  --brand:#023b7e;
+  --brand-pale:#dfe9f6;
+  --blue:#dfe9f6;
+  --green:#e8eef5;
+  --shadow:0 12px 32px rgba(2,59,126,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+.wrap{max-width:1160px;margin:auto;padding:30px 24px 60px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+header{padding:42px 0 30px;border-bottom:1px solid var(--line)}
+h1{font-size:clamp(42px,7vw,76px);line-height:.98;letter-spacing:-.055em;max-width:850px;margin:14px 0 18px;font-weight:850}
+.dek{font-size:clamp(17px,2vw,21px);max-width:760px;color:#1f2937;margin:0}
+.meta{font-size:12px;color:var(--muted);margin-top:22px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0 18px}
+.kpi{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.kpi strong{display:block;font-size:clamp(27px,4vw,42px);letter-spacing:-.04em;line-height:1.05}
+.kpi span{display:block;color:var(--muted);font-size:13px;margin-top:8px}
+.note{background:var(--blue);border-radius:14px;padding:16px 18px;font-size:13px;color:#1f2937;margin:14px 0 34px;border:1px solid var(--line)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:34px 0 14px}
+.section-head h2{font-size:27px;letter-spacing:-.035em;margin:0}
+.section-head p{font-size:13px;color:var(--muted);margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0 14px}
+button,.select-wrap input{font:inherit}
+.filter{border:1px solid #b8c5d4;background:transparent;color:var(--ink);padding:10px 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer}
+.filter.active{background:var(--brand);color:white;border-color:var(--brand)}
+.filter:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9ab4d8;outline-offset:2px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 20px}
+.tools input,.tools select{border:1px solid #b8c5d4;background:var(--white);border-radius:10px;padding:11px 13px;color:var(--ink);font:inherit;font-size:14px}
+.tools input{flex:1;min-width:220px}.tools select{min-width:180px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.item{background:var(--white);border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 4px 16px rgba(2,59,126,.035);display:flex;flex-direction:column;gap:11px}
+.item-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.num{font-size:11px;font-weight:800;color:var(--brand);letter-spacing:.1em;text-transform:uppercase}
+.item h3{font-size:18px;line-height:1.2;letter-spacing:-.02em;margin:4px 0 0}
+.amount{font-size:16px;font-weight:850;white-space:nowrap;text-align:right}
+.amount small{display:block;color:var(--muted);font-size:10px;font-weight:650;letter-spacing:.04em}
+.item p{margin:0;color:#1f2937;font-size:13px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.tag{font-size:11px;font-weight:750;padding:6px 9px;border-radius:999px;background:#edf2f7;color:#334155}
+.tag.orange{background:#e8eef5;color:#023b7e}
+.tag.red{background:#f1dede;color:#8b3030}
+.tag.yellow{background:#f7efd8;color:#795b16}
+.tag.green{background:#e7f1ea;color:#24543a}
+.tag.blue{background:#dfe9f6;color:#023b7e}
+.tag.grey{background:#eceff3;color:#4b5563}
+.detail{border-top:1px solid var(--line);padding-top:10px;margin-top:2px;font-size:12px;color:#475569}
+.empty{grid-column:1/-1;padding:30px;text-align:center;color:var(--muted);background:var(--white);border-radius:14px}
+.timeline{margin:42px 0 24px;background:var(--brand);color:white;border-radius:20px;padding:25px}
+.timeline h2{margin:0 0 4px;font-size:25px;letter-spacing:-.03em}
+.timeline>p{color:#dbe7f5;font-size:13px;margin:0 0 22px}
+.year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.year{background:#0b4b97;border-radius:13px;padding:15px}
+.year b{font-size:12px;color:#dbe7f5}
+.year strong{display:block;font-size:27px;letter-spacing:-.04em;margin:5px 0}
+.bar{height:7px;background:#7fa2cc;border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:#ffffff;border-radius:9px}
+.footer{border-top:1px solid var(--line);padding-top:20px;margin-top:34px;color:var(--muted);font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.footer strong{color:var(--ink)}
+@media(max-width:700px){
+  .wrap{padding:18px 15px 42px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi:last-child{grid-column:1/-1}
+  .cards{grid-template-columns:1fr}
+  .section-head{display:block}
+  .section-head p{margin-top:5px}
+  .year-grid{grid-template-columns:repeat(2,1fr)}
+  .footer{grid-template-columns:1fr}
+  header{padding-top:26px}
+}
+@media print{
+  body{background:white}
+  .wrap{max-width:none}
+  .item,.kpi{box-shadow:none}
+  .controls,.tools{display:none}
+  .cards{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Aarhus Kommune · Børn og Unge · Budget 2027–2030</div>
+  <h1>Hvor rammer sparekniven?</h1>
+  <p class="dek">23 forslag skal være med til at finansiere Børn og Unges bidrag til kommunens socialprocent. Her kan du se, hvilke tilbud og områder der er i spil – og hvad ændringerne kan betyde.</p>
+</header>
+
+<section class="kpis" aria-label="Hovedtal">
+  <div class="kpi"><strong>23</strong><span>forslag i sparekataloget</span></div>
+  <div class="kpi"><strong>33,8 mio. kr.</strong><span>opgjort beløb i 2027</span></div>
+  <div class="kpi"><strong>125,3 mio. kr.</strong><span>opgjort i alt over 2027–2030</span></div>
+</section>
+
+
+<div class="section-head">
+  <div><div class="eyebrow">Gå på opdagelse</div><h2>Se forslagene område for område</h2></div>
+  <p id="count" aria-live="polite">Viser 23 forslag</p>
+</div>
+
+<div class="controls" role="group" aria-label="Filtrér efter område">
+  <button class="filter active" data-cat="all">Alle 23</button>
+  <button class="filter" data-cat="day">Dagtilbud · 5</button>
+  <button class="filter" data-cat="sfo">SFO og UngiAarhus · 5</button>
+  <button class="filter" data-cat="special">Specialtilbud · 2</button>
+  <button class="filter" data-cat="school">Skoleindsatser · 5</button>
+  <button class="filter" data-cat="other">Øvrige · 6</button>
+</div>
+
+<div class="tools">
+  <input id="search" type="search" placeholder="Søg fx dagpleje, tandpleje eller READ…" aria-label="Søg i forslag">
+  <select id="year" aria-label="Vælg år">
+    <option value="2027">Beløb i 2027</option>
+    <option value="2028">Beløb i 2028</option>
+    <option value="2029">Beløb i 2029</option>
+    <option value="2030">Beløb i 2030</option>
+  </select>
+</div>
+
+
+<div class="cards" id="cards"></div>
+
+<section class="timeline">
+  <div class="eyebrow" style="color:#dbe7f5">Økonomien over tid</div>
+  <h2>Sparekravet falder med 5 mio. kr. fra 2029</h2>
+  <p>Børn og Unge skal fra 2029 finde 5 mio. kr. mindre til kommunens socialprocent. Grafikken viser katalogets samlede beløb år for år – inklusive indfasningsposten.</p>
+  <div class="year-grid">
+    <div class="year"><b>2027</b><strong>33,8 mio. kr.</strong><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="year"><b>2028</b><strong>33,8 mio. kr.</strong><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="year"><b>2029</b><strong>28,8 mio. kr.</strong><div class="bar"><i style="width:85.2%"></i></div></div>
+    <div class="year"><b>2030</b><strong>28,8 mio. kr.</strong><div class="bar"><i style="width:85.2%"></i></div></div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const items = [
+{n:1,c:"day",name:"Lukning af dagtilbudsafdeling i Ajstrup",v:[.185,.445,.445,.445],desc:"Naturbørnehaven Gl. Ajstrup foreslås lukket som dagtilbudsafdeling. Cirka 12–14 børn forventes at skulle have en anden plads i Beder-Malling Dagtilbud.",impact:"Børn får tilbudt plads et andet sted"},
+{n:2,c:"day",name:"Tovshøj og Brabrand Dagtilbud lægges sammen",v:[.239,.478,.478,.478],desc:"De to dagtilbud bliver ét samlet dagtilbud. Afdelingerne og børnene fortsætter på deres nuværende adresser; besparelsen findes især ved én dagtilbudsleder mindre.",impact:"Organisationsændring"},
+{n:3,c:"day",name:"Aldersgrænsen i dagplejen sænkes fra fire til tre år",v:[1.227,1.227,1.227,1.227],desc:"Børn skal som udgangspunkt begynde i børnehave, når de fylder tre år. Nogle forældre mister dermed muligheden for selv at vælge at beholde barnet i dagplejen længere.",impact:"Kortere tid i dagpleje"},
+{n:4,c:"day",name:"Færre penge til kompetenceudvikling i dagtilbud",v:[.250,.250,.250,.250],desc:"Den centrale pulje til blandt andet uddannelse af sprogvejledere, netværk og læringsforløb for pædagogiske ledere skæres ned. Ifølge kommunen har forbruget de seneste år været mindre, end der er sat penge af til.",impact:"Mindre budget"},
+{n:5,c:"day",name:"Særligt læsetilbud for 3-4-årige stopper",v:[.214,.214,.214,.214],desc:"Familier i udvalgte dagtilbudsafdelinger får ikke længere en READ-taske med bøger, spil og vejledningsmateriale. Dagtilbuddene kan selv prioritere læseindsatsen.",impact:"READ-tasker bortfalder"},
+{n:6,c:"sfo",name:"Rammebesparelse i SFO",v:[6.500,6.500,6.500,6.500],desc:"SFO-budgetterne reduceres med 6,5 mio. kr. Kommunen vurderer, at det nuværende serviceniveau kan opretholdes, fordi SFO'erne gennem flere år samlet set har brugt færre penge, end der har været sat af i budgetterne.",impact:"Kommunen forventer uændret serviceniveau"},
+{n:7,c:"sfo",name:"Forældrebetalingen i SFO stiger",v:[0,1.986,1.966,1.954],desc:"Taksten foreslås hævet med én procent ud over den almindelige fremskrivning fra 1. januar 2028. Kommunen anslår, at prisen for en SFO-plads stiger med ca. 25 kr. om måneden i 2028.",impact:"Højere udgift for familier"},
+{n:8,c:"sfo",name:"Rammebesparelse i UngiAarhus",v:[2.500,2.500,2.500,2.500],desc:"En samlet reduktion skal blandt andet findes ved at stoppe tilbud om valgfag i samarbejde med erhvervsuddannelserne, fjerne en medarbejder i Ungdomskulturhuset, nedskalere musikfestivalen OMG! og reducere klubbernes almenbudget.",impact:"Aktiviteter og klubrammer reduceres"},
+{n:9,c:"sfo",name:"Fritids- og ungdomsklubber bliver dyrere",v:[0,.555,1.114,1.680],desc:"Betalingen for medlemskab i fritids- og ungdomsklubber kan stige én procent årligt ud over den almindelige fremskrivning i 2028, 2029 og 2030.",impact:"Højere udgift for familier"},
+{n:10,c:"sfo",name:"Støttetimer i private SFO'er og klubber fjernes",v:[2.890,2.918,2.854,2.815],desc:"Aarhus Kommune foreslår at fjerne tilskud til støttekrævende børn i privatskolers SFO'er og til private klubber. Tilskuddet er rettet mod konkrete børn efter individuel vurdering.",impact:"Støttetilskud bortfalder"},
+{n:11,c:"special",name:"To behandlingspladser på Skovbrynet nedlægges",v:[.904,.904,1.808,1.808],desc:"To behandlingspladser foreslås nedlagt. Kommunen oplyser, at ingen børn er visiteret til pladserne i 2026, og vurderer, at målgruppens behov kan dækkes i andre tilbud.",impact:"To behandlingspladser forsvinder"},
+{n:12,c:"special",name:"Budgettet på Holme Søndergaard reduceres",v:[.200,.200,.200,.200],desc:"Specialklubben for unge og stedets STU-tilbud (Særligt Tilrettelagt Ungdomsuddannelse, red.) får en rammereduktion. Kommunen peger blandt andet på synergi mellem tilbuddene og tidligere overskud i forhold til budgettet.",impact:"Mindre budget"},
+{n:13,c:"school",name:"Udsyn mod arbejdsliv får mindre budget",v:[.700,.700,.700,.700],desc:"Budgettet til initiativet 'Udsyn mod arbejdsliv' og praktiske undervisningsforløb reduceres. Indsatsen omfatter blandt andet virksomhedsbesøg, erhvervspraktik og praktiske forløb.",impact:"Færre midler til forløb"},
+{n:14,c:"school",name:"AarhusSkills stopper",v:[.300,.300,.300,.300],desc:"Arrangementet, der siden 2013 har introduceret 8.-klasseelever til erhvervsuddannelser og erhvervsrettede fag, foreslås ikke længere afholdt.",impact:"Arrangementet bortfalder"},
+{n:15,c:"school",name:"Workshoppen Social Pejling stopper",v:[.145,.290,.290,.290],desc:"Det fire lektioner lange forløb for 5. klasser, der arbejder med sociale overdrivelser og misforståelser om blandt andet rygning og alkohol, ophører.",impact:"Workshoppen bortfalder"},
+{n:16,c:"school",name:"Samtale Mellem Generationer stopper",v:[.125,.250,.250,.250],desc:"Workshoppen for 7.–9. klasser, unge og forældre om ungdomsliv, trivsel, sociale medier og risikoadfærd foreslås afviklet.",impact:"Workshoppen bortfalder"},
+{n:17,c:"school",name:"Tilskud til kulturaktører skæres ned",v:[.500,.500,.500,.500],desc:"Puljen til kulturaktører, der laver læringsaktiviteter for skolerne, reduceres. Det kan betyde lavere eller bortfaldne tilskud og færre læringsforløb.",impact:"Færre eller mindre læringsforløb"},
+{n:18,c:"other",name:"Tandplejens budget reduceres med én procent",v:[0,1.516,1.516,1.516],desc:"Fra 2028 skal Tandplejen finde besparelsen gennem effektivisering og prioritering. Kommunen forventer et reduceret serviceniveau. De konkrete ændringer og konsekvenser for børn, unge og familier skal fastlægges som led i udmøntningen.",impact:"Forventet lavere serviceniveau"},
+{n:19,c:"other",name:"Tilskuddet til Cirkus Tværs reduceres",v:[.250,.250,.250,.250],desc:"Kommunens tilskud reduceres. Tilskuddet er foreningens væsentligste indtægtskilde, og kommunen forventer derfor, at det kan føre til færre aktiviteter.",impact:"Forventet aktivitetsreduktion"},
+{n:20,c:"other",name:"Tilskuddet til Legeland reduceres",v:[.150,.150,.150,.150],desc:"Tilskuddet til det indendørs kreative legemiljø reduceres. Foreningen forventes at skulle sætte den daglige leder ned i tid, medmindre den finder andre indtægter.",impact:"Lederstilling sættes ned i tid"},
+{n:21,c:"other",name:"Trivselsmåling/APV hvert tredje år",v:[0,.105,.105,.105],desc:"Aarhus Kommune foreslår at gå fra trivselsmåling hvert andet år til hvert tredje år. Ændringen kræver enighed mellem ledelses- og medarbejderrepræsentanter.",impact:"Sjældnere måling"},
+{n:22,c:"other",name:"Besparelser i Børn og Unges fællesfunktioner",v:[1.785,5.000,5.000,5.000],desc:"Fem mio. kr. årligt skal blandt andet findes gennem organisationstjek, ændrede kommunikationsopgaver, mindre ledelse og mindre faglig understøttelse af lærings- og skoleudviklingssamtaler.",impact:"Færre administrative ressourcer"},
+{n:23,c:"other",name:"Midlertidig finansiering af indfasningen",v:[-14.772,-6.598,-.219,.296],desc:"Ikke en selvstændig servicebesparelse. Posten dækker den midlertidige finansiering, der skal få økonomien til at hænge sammen, mens de øvrige forslag indfases. Finansieringen kommer blandt andet fra opsparing og forventede uforbrugte midler.",impact:"Finansieringspost – ikke et tilbud",special:true}
+];
+
+const tones = {
+  1:"blue",2:"blue",3:"orange",4:"grey",5:"orange",
+  6:"green",7:"yellow",8:"orange",9:"yellow",10:"orange",
+  11:"orange",12:"grey",13:"orange",14:"orange",15:"orange",
+  16:"orange",17:"orange",18:"red",19:"orange",20:"orange",
+  21:"blue",22:"blue",23:"grey"
+};
+
+const cats = {
+  day:"Dagtilbud",
+  sfo:"SFO og UngiAarhus",
+  special:"Specialtilbud",
+  school:"Skoleindsatser",
+  other:"Øvrige"
+};
+
+let active="all";
+
+const fmt=(x)=>Math.round(Math.abs(x)*1000000).toLocaleString("da-DK");
+
+function render(){
+  const q=document.getElementById("search").value.toLocaleLowerCase("da");
+  const yr=Number(document.getElementById("year").value)-2027;
+  const filtered=items.filter(x=>(active==="all"||x.c===active) && (x.name+" "+x.desc+" "+x.impact).toLocaleLowerCase("da").includes(q));
+  document.getElementById("count").textContent=`Viser ${filtered.length} af 23 forslag`;
+  const root=document.getElementById("cards");
+  root.innerHTML="";
+  if(!filtered.length){
+    root.innerHTML='<div class="empty">Ingen forslag matcher din søgning.</div>';
+    return;
+  }
+  filtered.forEach(x=>{
+    const amount=x.v[yr];
+    const card=document.createElement("article");
+    card.className="item";
+    const display=(amount<0?`−${fmt(amount)}`:fmt(amount)) + " kr.";
+    card.innerHTML=`<div class="item-top"><div><div class="num">Forslag ${x.n} · ${cats[x.c]}</div><h3>${x.name}</h3></div><div class="amount">${display}<small>${2027+yr}</small></div></div><p>${x.desc}</p><div class="tags"><span class="tag ${tones[x.n]}">${x.impact}</span></div>${x.special?'<div class="detail"><strong>Bemærk:</strong> Beløbet er en finansieringspost. Et negativt tal reducerer katalogets samlede nettobeløb.</div>':""}`;
+    root.appendChild(card);
+  });
+}
+
+document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  active=b.dataset.cat;
+  render();
+}));
+document.getElementById("search").addEventListener("input",render);
+document.getElementById("year").addEventListener("change",render);
+render();
+</script>
+</body>
+</html>
+
