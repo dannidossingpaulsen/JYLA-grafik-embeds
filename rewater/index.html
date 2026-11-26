@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vi undersøger Aarhus ReWater</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;color:#000000;background:#fff;font:16px/1.5 system-ui,sans-serif}
+.wrap{max-width:1050px;margin:0 auto;padding:0;position:relative}
+html.embedded{overflow:hidden}
+section{background:#e9eef2;border-top:4px solid #023b7e;padding:clamp(16px,4vw,36px)}
+h1{font:700 clamp(29px,5vw,46px)/1.06 Georgia,serif;letter-spacing:-.035em;margin:0 0 10px}
+p{margin:0 0 20px;color:#334155}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}
+.toolbar h2{font-size:14px;margin:0;color:#334155}
+.controls{display:flex;gap:6px}
+.controls button{width:44px;height:44px;border:1px solid #023b7e;border-radius:4px;background:white;color:#023b7e;font-size:22px;cursor:pointer}
+.controls button:disabled{opacity:.35;cursor:default}
+.cards{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 28px)/3);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;scroll-behavior:smooth}
+.cards::-webkit-scrollbar{display:none}
+.card{display:block;background:white;color:inherit;text-decoration:none;border:1px solid #cfd8e3;border-radius:6px;overflow:hidden;scroll-snap-align:start}
+.visual{display:block;position:relative;overflow:hidden;aspect-ratio:16/9;background:#dfe9f6 center/cover}
+.visual img{display:block;width:100%;height:100%;object-fit:cover}
+.visual img[hidden]{display:none}
+.visual.unavailable::after{content:'Billede utilgængeligt';position:absolute;inset:0;display:grid;place-items:center;color:#334155;font:600 13px/1.2 system-ui,sans-serif}
+.archive .visual.unavailable::after{content:none}
+.card h3{font:700 clamp(19px,2.4vw,24px)/1.18 Georgia,serif;margin:0;padding:14px 14px 18px}
+a:hover h3,a:hover{text-decoration:underline}
+:focus-visible{outline:3px solid #023b7e;outline-offset:2px}
+.card:focus-visible{outline-offset:-4px}
+details{margin-top:19px}
+summary{display:inline-flex;gap:18px;align-items:center;cursor:pointer;background:#023b7e;color:white;padding:10px 15px;border-radius:4px;font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-size:20px;line-height:1}
+details[open] summary::after{content:'−'}
+.archive{margin:16px 0 0;padding:0;list-style:none}
+.archive a{display:grid;grid-template-columns:clamp(70px,14vw,112px) minmax(0,1fr);align-items:center;gap:14px;padding:9px 0;border-top:1px solid #cfd8e3;color:inherit;text-decoration:none;font-weight:650;line-height:1.35}
+.archive a:hover .headline{text-decoration:underline}
+.archive .visual{border-radius:3px}
+@media(max-width:650px){
+ .cards{grid-auto-columns:84%;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){.cards{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section aria-labelledby="heading">
+<h1 id="heading">Vi undersøger Aarhus ReWater</h1>
+<p>Følg vores dækning af det nye renseanlæg ved Tangkrogen.</p>
+<div class="toolbar">
+<h2 id="latest">De seneste artikler</h2>
+<div class="controls">
+<button type="button" id="previous" aria-label="Forrige artikel" aria-controls="cards">‹</button>
+<button type="button" id="next" aria-label="Næste artikel" aria-controls="cards">›</button>
+</div>
+</div>
+<div id="cards" class="cards" role="region" aria-labelledby="latest" tabindex="0"></div>
+<details>
+<summary>Se alle artikler</summary>
+<ul class="archive"></ul>
+</details>
+</section>
+</main>
+<script type="application/json" id="articles">
+[
+  {
+    "url": "https://dinavis.dk/samfund/ECE19866623/aarhus-vand-kaldte-milliardprojekt-konkurrencedygtigt-nu-svarer-selskabet-hverken-ja-eller-nej/",
+    "title": "Aarhus Vand kaldte milliardprojekt konkurrencedygtigt – nu svarer selskabet hverken ja eller nej",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/19867895/5gnwnf/ALTERNATES/master-social/hovedforslag-aarhus-rewater-henning-larsen-jpg",
+    "id": "19866623",
+    "published": "2026-11-25T14:32:07Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE19845648/prisen-paa-renseanlaeg-stiger-med-milliardbeloeb-og-betyder-dyrere-vandregning-for-aarhusianerne/",
+    "title": "Prisen på »megaprojekt« stiger med milliardbeløb og betyder dyrere vandregning for aarhusianerne",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/19155560/7xangx/ALTERNATES/master-social/aarhus-rewater-birdeye-view-hoejderyg-kreditering-henning-larsen-png",
+    "id": "19845648",
+    "published": "2026-11-18T15:04:26Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE19848372/derfor-stiger-din-vandregning-som-en-raket-og-8-andre-svar-om-aarhus-milliarddyre-renseanlaeg/",
+    "title": "Derfor stiger din vandregning som en raket - og 8 andre svar om Aarhus' milliarddyre renseanlæg",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/19848598/hxjtiy/ALTERNATES/master-social/arkiv",
+    "id": "19848372",
+    "published": "2026-11-18T19:28:56Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE19154776/flere-aar-foer-foerste-spadestik-aarhus-vand-har-fyret-en-halv-milliard-kroner-af-paa-megaprojekt/",
+    "title": "Flere år før første spadestik: Aarhus Vand har fyret en halv milliard kroner af på megaprojekt",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/19154779/j45bju/ALTERNATES/master-social/img0341-jpeg",
+    "id": "19154776",
+    "published": "2026-03-26T14:52:13Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE19098632/forening-klager-kan-udsaette-kritisk-presset-milliardprojekt/",
+    "title": "Forening klager: Kan udsætte kritisk presset milliard-projekt",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/17918468/kkpy2v/ALTERNATES/master-social/image00008-jpeg",
+    "id": "19098632",
+    "published": "2026-03-10T16:57:14Z"
+  },
+  {
+    "url": "https://dinavis.dk/politik/ECE18264330/trods-trusler-byraad-holder-fast-i-placering-af-milliardanlaeg-paa-tangkrogen/",
+    "title": "Trods trusler: Byråd holder fast i placering af milliardanlæg på Tangkrogen",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/18266172/lyha2d/ALTERNATES/master-social/hovedforslaget-jpg",
+    "id": "18264330",
+    "published": "2025-06-11T11:53:33Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE18204142/borgere-paa-krigsstien-i-har-seks-maaneder-til-at-lave-soenderrivende-larm/",
+    "title": "Borgere på krigsstien: »I har seks måneder til at lave sønderrivende larm«",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/18204126/o4vyqw/ALTERNATES/master-social/img8472edited-jpg",
+    "id": "18204142",
+    "published": "2025-05-21T04:00:00Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE18190175/de-fik-aflivet-havneudvidelsen-nu-kommer-forening-med-utvetydig-trussel-til-byraadet/",
+    "title": "De slagtede havneudvidelsen - nu kommer forening med utvetydig trussel til byrådet",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/18190192/kl0f8r/ALTERNATES/master-social/svend-erik-kristensen",
+    "id": "18190175",
+    "published": "2025-05-16T10:42:28Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE17949055/havmiljoeforening-ryster-paa-hovedet-jeg-ved-naesten-ikke-om-jeg-skal-grine-eller-graede/",
+    "title": "Havmiljøforening ryster på hovedet: »Jeg ved næsten ikke, om jeg skal grine eller græde«",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/17949052/9u2j07/ALTERNATES/master-social/image00002-jpeg",
+    "id": "17949055",
+    "published": "2025-02-28T05:02:00Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE17945268/for-otte-aar-siden-var-folk-rasende-nu-peger-alt-paa-at-gigantisk-renseanlaeg-ender-samme-sted/",
+    "title": "For otte år siden var folk rasende: Nu peger alt på, at gigantisk renseanlæg ender samme sted",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/17948743/ko8lmm/ALTERNATES/master-social/hovedforslaget-jpg",
+    "id": "17945268",
+    "published": "2025-02-27T14:13:14Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE17918472/i-aarevis-kaempede-han-med-naeb-og-kloer-i-havneslagsmaal-nu-vil-svend-erik-redde-populaer-strand/",
+    "title": "I årevis kæmpede han med næb og klør i havneslagsmål: Nu vil Svend Erik redde populær strand",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/17918461/j0umsj/ALTERNATES/master-social/image00002-jpeg",
+    "id": "17918472",
+    "published": "2025-02-22T10:00:00Z"
+  },
+  {
+    "url": "https://dinavis.dk/samfund/ECE17927619/det-haster-med-milliarddyrt-renseanlaeg-tiden-er-vores-fjende/",
+    "title": "»Tiden er vores fjende,« siger direktør om milliardanlæg: Så dyrt bliver det for dig",
+    "image": "https://billeder.lokalavisen.dk/pictures/image/17928901/9kidba/ALTERNATES/master-social/hovedforslag-aarhus-rewater-henning-larsen-jpg",
+    "id": "17927619",
+    "published": "2025-02-22T09:58:00Z"
+  }
+]
+</script>
+<script>
+'use strict';
+
+// Tilføj artikler i JSON-listen. Publiceringstidspunktet styrer rækkefølgen.
+// Brug ?artikel=19845648 til at udelade den artikel, modulet er indlejret i.
+const articles = JSON.parse(document.querySelector('#articles').textContent);
+const current = new URLSearchParams(location.search).get('artikel');
+const available = articles.filter(article => article.id !== current)
+  .sort((first, second) => Date.parse(second.published) - Date.parse(first.published));
+const cards = document.querySelector('.cards');
+const previous = document.querySelector('#previous');
+const next = document.querySelector('#next');
+const details = document.querySelector('details');
+const summary = details.querySelector('summary');
+const archive = details.querySelector('.archive');
+
+function articleImage(article, lazy) {
+  const visual = document.createElement('span');
+  visual.className = 'visual';
+  const image = document.createElement('img');
+  image.alt = '';
+  image.loading = lazy ? 'lazy' : 'eager';
+  image.addEventListener('error', () => {
+    image.hidden = true;
+    visual.classList.add('unavailable');
+  });
+  image.src = article.image;
+  visual.append(image);
+  return visual;
+}
+
+function articleLink(article) {
+  const link = document.createElement('a');
+  link.href = article.url;
+  link.target = '_top';
+  return link;
+}
+
+for (const [index, article] of available.entries()) {
+  const card = articleLink(article);
+  card.className = 'card';
+  const title = document.createElement('h3');
+  title.textContent = article.title;
+  card.append(articleImage(article, index >= 3), title);
+  cards.append(card);
+
+  const item = document.createElement('li');
+  const link = articleLink(article);
+  const headline = document.createElement('span');
+  headline.className = 'headline';
+  headline.textContent = article.title;
+  link.append(articleImage(article, true), headline);
+  item.append(link);
+  archive.append(item);
+}
+
+function updateArrows() {
+  previous.disabled = cards.scrollLeft <= 1;
+  next.disabled = cards.scrollLeft + cards.clientWidth >= cards.scrollWidth - 1;
+}
+
+function slide(direction) {
+  if (cards.children.length < 2) return;
+  const step = cards.children[1].offsetLeft - cards.children[0].offsetLeft;
+  cards.scrollBy({ left: direction * step });
+}
+
+previous.addEventListener('click', () => slide(-1));
+next.addEventListener('click', () => slide(1));
+cards.addEventListener('scroll', updateArrows, { passive: true });
+new ResizeObserver(updateArrows).observe(cards);
+updateArrows();
+
+function updateSummary() {
+  summary.textContent = details.open
+    ? 'Skjul artikeloversigten'
+    : `Se alle ${available.length} artikler`;
+}
+details.addEventListener('toggle', updateSummary);
+updateSummary();
+
+if (window.parent !== window) {
+  document.documentElement.classList.add('embedded');
+  const wrap = document.querySelector('.wrap');
+  let lastHeight = 0;
+  let lastWidth = 0;
+  let measurementScheduled = false;
+
+  function measure() {
+    measurementScheduled = false;
+    const wrapTop = wrap.getBoundingClientRect().top;
+    let bottom = 0;
+    for (const child of wrap.children) {
+      if (getComputedStyle(child).display === 'none') continue;
+      bottom = Math.max(bottom, child.getBoundingClientRect().bottom - wrapTop);
+    }
+    const bottomPadding = parseFloat(getComputedStyle(wrap).paddingBottom) || 0;
+    const height = Math.ceil(bottom + bottomPadding);
+    if (height > 0 && height !== lastHeight) {
+      lastHeight = height;
+      window.parent.postMessage({ type: 'rewater:resize', height }, '*');
+    }
+  }
+
+  function scheduleMeasurement() {
+    if (measurementScheduled) return;
+    measurementScheduled = true;
+    requestAnimationFrame(measure);
+  }
+
+  new ResizeObserver(() => {
+    const width = wrap.clientWidth;
+    if (width !== lastWidth) {
+      lastWidth = width;
+      scheduleMeasurement();
+    }
+  }).observe(wrap);
+  new MutationObserver(scheduleMeasurement).observe(wrap, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+  details.addEventListener('toggle', scheduleMeasurement);
+  window.addEventListener('load', scheduleMeasurement);
+  document.fonts?.ready.then(scheduleMeasurement);
+  scheduleMeasurement();
+}
+</script>
+</body>
+</html>
